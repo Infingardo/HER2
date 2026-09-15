@@ -127,7 +127,7 @@ function buildObserved(input: ScoringInput): string {
       : 'senza cluster di ≥5 cellule tumorali coesive';
   }
   const cyto = cytoplasmicOnly ? ' (reattivita solo citoplasmatica, membrana non valutabile come positiva)' : '';
-  return `Colorazione di membrana ${intensityLabel(intensity)}, pattern ${patternLabel(pattern)}, ${extent}${cyto}.`;
+  return `Colorazione di membrana ${intensityLabel(intensity)}, pattern: ${patternLabel(pattern)}, ${extent}${cyto}.`;
 }
 
 // Source versions are explicit; these are not claims of automatic guideline updates.
@@ -220,7 +220,7 @@ function gastric(input: ScoringInput): ScoringResult {
   const threshold = input.sampleType === 'biopsia' ? input.cluster5 : input.percent >= 10;
   if (!threshold) return result(input, '0', input.sampleType === 'biopsia' ?
     'Reattività presente senza cluster di almeno 5 cellule tumorali coesive: sotto soglia per il protocollo gastrico.' :
-    'Reattività presente in <10% sul pezzo chirurgico: sotto soglia per il protocollo gastrico.', { modifier: 'reattività sotto soglia' });
+    'Reattività presente in <10% delle cellule tumorali: sotto soglia per il protocollo gastrico.', { modifier: 'reattività sotto soglia' });
   if (input.intensity === 'debole') return result(input, '1+', 'Reattività tenue/appena percettibile sopra soglia; può essere parziale.');
   if (input.pattern === 'incompleta') return result(input, '1+',
     'Reattività di membrana incompleta e non laterale/basolaterale: sopra soglia di estensione ma non qualificante per 2+ o 3+ nel protocollo gastrico.', {
@@ -296,7 +296,7 @@ export function computeScore(input: ScoringInput): ScoringResult {
     // L'eleggibilità agnostica a T-DXd è ancorata all'IHC 3+: una componente intensa sotto soglia va comunque detta.
     if (input.intensity === 'forte' && scored.score === '0') {
       scored.notes.push(isResective(input.sampleType)
-        ? `Presente componente con reattività intensa (qualità 3+) ma in <10% delle cellule: sotto soglia per il protocollo adottato. Segnalarlo nel referto, perche l’eleggibilità agnostica a trastuzumab deruxtecan è ancorata all’IHC 3+.`
+        ? `Presente componente con reattività intensa (qualità 3+) ma in <10% delle cellule: sotto soglia per il protocollo adottato. Segnalarlo nel referto, perché l’eleggibilità agnostica a trastuzumab deruxtecan è ancorata all’IHC 3+.`
         : 'Presente reattività intensa (qualità 3+) senza cluster di ≥5 cellule coesive: sotto soglia. Valutare se il campione è rappresentativo e considerare un prelievo più ampio.');
     }
     if (scored.status === 'scored' && scored.score === '2+') {

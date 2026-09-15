@@ -1,7 +1,9 @@
-import { Printer, AlertTriangle, Syringe, ArrowRight, FileText, FlaskConical } from 'lucide-react';
+import { useState } from 'react';
+import { Printer, AlertTriangle, Syringe, ArrowRight, FileText, FlaskConical, ClipboardCopy, Check } from 'lucide-react';
 import type { ScoringResult } from '../lib/scoring';
 import type { SampleType } from '../lib/scoring';
 import { sampleTypeLabel } from '../lib/api';
+import { buildReportText } from '../lib/report';
 
 interface Props {
   result: ScoringResult;
@@ -19,6 +21,24 @@ const CATEGORY_STYLES: Record<string, string> = {
 };
 
 export default function ResultCard({ result, organName, sampleType, caseCode, createdAt, operator }: Props) {
+  const [copied, setCopied] = useState(false);
+  const reportText = buildReportText(result, {
+    organName,
+    sampleTypeLabel: sampleTypeLabel(sampleType),
+    caseCode,
+  });
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(reportText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Contesto non sicuro o permesso negato: il testo resta selezionabile a mano nel riquadro.
+      setCopied(false);
+    }
+  };
+
   return (
     <div id="print-report" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="bg-gradient-to-r from-teal-700 to-cyan-700 px-5 py-4 text-white sm:px-8">
@@ -115,6 +135,25 @@ export default function ResultCard({ result, organName, sampleType, caseCode, cr
             </ul>
           </div>
         )}
+
+        <div className="mt-6 rounded-xl border border-slate-300 bg-slate-900 p-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-300">
+              <ClipboardCopy className="h-4 w-4" /> Testo pronto per il referto
+            </p>
+            <button
+              onClick={copy}
+              className="no-print flex items-center gap-2 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
+            >
+              {copied ? <><Check className="h-3.5 w-3.5" /> Copiato</> : <><ClipboardCopy className="h-3.5 w-3.5" /> Copia</>}
+            </button>
+          </div>
+          <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-[12px] leading-relaxed text-slate-100">{reportText}</pre>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
+            Score e classificazione restano voci separate: un 2+ non e&apos; una positivita&apos; finche&apos; il protocollo non lo dice.
+            Rileggere e adattare al proprio referto prima di firmare.
+          </p>
+        </div>
 
         <p className="mt-6 border-t border-slate-100 pt-3 text-[11px] leading-relaxed text-slate-400">
           Supporto decisionale per patologi e oncologi — verificare sempre il testo originale delle linee guida e i

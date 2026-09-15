@@ -58,6 +58,20 @@ Quando è presente una componente con reattività intensa (qualità 3+) ma sotto
 
 Nota sul perimetro: DESTINY-PanTumor02 ha arruolato IHC 3+ e 2+ senza ISH, ma l'approvazione tumor-agnostica che ne è derivata copre il solo IHC 3+. Popolazione arruolata e popolazione approvata non coincidono.
 
+## Testo pronto per il referto
+
+Lo step 4 produce un blocco di testo copiabile, pensato per essere incollato nel referto e poi riletto e adattato. La struttura tiene **score e classificazione su righe separate**:
+
+```
+Score IHC: 2+
+Protocollo applicato: ASCO/CAP mammella 2023 (carcinoma invasivo)
+Classificazione: IHC equivoco; stato integrato da definire
+```
+
+È la formulazione che evita il "positivo (score 2+)": nei protocolli gastroesofageo e HERACLES un 2+ è un equivoco che richiede ISH, e la parola positivo, se compare accanto allo score, viene letta come stato HER2. Quando lo score non è assegnabile il testo lo dichiara e ne riporta il motivo, invece di produrre un valore.
+
+Le note metodologiche finiscono nel blocco: su un uroteliale sotto soglia con componente intensa, la segnalazione della componente 3+ focale arriva nel referto insieme alla ragione per cui conta.
+
 ## Deploy
 
 `.github/workflows/pages.yml` pubblica `dist` su GitHub Pages a ogni push su `main`, dopo test, lint e build. Va abilitato una volta in Settings > Pages > Source: GitHub Actions.
