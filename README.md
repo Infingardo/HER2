@@ -84,7 +84,7 @@ Lo ZIP originale conteneva in `vercel.json` una chiave con prefisso `sb_secret_`
 
 ## Risultati della verifica
 
-25 test superati: scoring, soglie, 4.928 combinazioni per gli invarianti, rendering server del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
+35 test superati: scoring, soglie, 7.392 combinazioni per gli invarianti, 1.134 combinazioni producibili dall'interfaccia verificate tutte con uno score assegnato, testo del referto (score e classificazione su righe separate, assenza di indicazioni terapeutiche per ogni organo), rendering del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
 
 ## Limiti clinici
 
