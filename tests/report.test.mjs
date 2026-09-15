@@ -52,3 +52,21 @@ test('La componente 3+ sotto soglia arriva nel referto uroteliale', () => {
  assert.ok(/<10% delle cellule/.test(t));
  assert.ok(/trastuzumab deruxtecan/.test(t), 'la ragione della segnalazione deve restare leggibile');
 });
+
+test('Referto uroteliale 3+ dichiara il criterio applicato e documenta IHC 3+', () => {
+ const t = buildReportText(
+  computeScore({...base, organ:'vescica', sampleType:'biopsia', intensity:'forte', pattern:'basolaterale', percent:0, cluster5:true}),
+  {organName:'Carcinoma uroteliale', sampleTypeLabel:'Biopsia'});
+ assert.match(t, /Protocollo applicato: Criteri gastrici/);
+ assert.match(t, /nel campione è documentata espressione HER2 IHC 3\+/i);
+ assert.doesNotMatch(t, /eleggibile|prescriv|iniziare la terapia/i);
+});
+
+test('Referto uroteliale 2+ non lo presenta come positivo né come IHC 3+', () => {
+ const t = buildReportText(
+  computeScore({...base, organ:'vescica', sampleType:'biopsia', intensity:'debole_moderata', pattern:'basolaterale', percent:0, cluster5:true}),
+  {organName:'Carcinoma uroteliale', sampleTypeLabel:'Biopsia'});
+ assert.match(t, /Score IHC: 2\+/);
+ assert.match(t, /non si documenta espressione HER2 IHC 3\+/i);
+ assert.doesNotMatch(t, /Classificazione:.*positiv/i);
+});

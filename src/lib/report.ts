@@ -16,6 +16,12 @@ function classification(result: ScoringResult): string {
   return result.category;
 }
 
+function urothelialConclusion(result: ScoringResult): string | null {
+  if (!result.protocol?.includes('carcinoma uroteliale') || result.score === null) return null;
+  if (result.score === '3+') return 'Nel campione è documentata espressione HER2 IHC 3+ secondo i criteri gastrici applicati.';
+  return `Nel campione non si documenta espressione HER2 IHC 3+ secondo i criteri gastrici applicati (score IHC ${result.score}).`;
+}
+
 export function buildReportText(result: ScoringResult, ctx: ReportContext): string {
   const L: string[] = [];
   L.push('HER2 — valutazione immunoistochimica');
@@ -33,6 +39,8 @@ export function buildReportText(result: ScoringResult, ctx: ReportContext): stri
     L.push(`Classificazione: ${classification(result)}`);
     if (result.her2StatusDetail) L.push(`  ${result.her2StatusDetail}`);
     L.push(`Interpretazione: ${result.interpretation}`);
+    const conclusion = urothelialConclusion(result);
+    if (conclusion) L.push(`Conclusione: ${conclusion}`);
     L.push(`Condotta: ${result.action}`);
   }
 
