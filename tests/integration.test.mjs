@@ -17,13 +17,13 @@ test('ResultCard mostra esito non valutabile senza falso zero',()=>{
 });
 test('Salvataggio, rilettura e cancellazione preservano score null e snapshot',async()=>{
  const result=computeScore(input);
- const saved=await api.saveEvaluation({case_code:'TEST',organ_code:'mammella',score:result.score,result_snapshot:result,algorithm_version:'0.2.0'});
+ const saved=await api.saveEvaluation({case_code:'TEST',organ_code:'mammella',score:result.score,result_snapshot:result,algorithm_version:'0.2.1'});
  const rows=await api.fetchEvaluations();assert.equal(rows.length,1);assert.equal(rows[0].score,null);assert.deepEqual(rows[0].result_snapshot,result);
  await api.deleteEvaluation(saved.id);assert.equal((await api.fetchEvaluations()).length,0);
 });
 test('Catalogo disponibile senza rete e nessuna credenziale',async()=>{
  globalThis.fetch=()=>{throw new Error('Unexpected network request');};
- assert.equal((await api.fetchOrgans()).length,11);assert.equal((await api.fetchGuidelines()).length,3);assert.ok((await api.fetchCriteria('mammella')).length>0);
+ assert.equal((await api.fetchOrgans()).length,11);assert.equal((await api.fetchGuidelines()).length,4);assert.ok((await api.fetchCriteria('mammella')).length>0);
 });
 // HTML snapshot for non-browser inspection; not a screenshot or end-to-end UI test.
 await writeFile('node_modules/.cache/her2-tests/result.html',renderToStaticMarkup(createElement(ResultCard,{result:computeScore(input),organName:'Mammella',sampleType:'resezione'})));

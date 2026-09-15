@@ -43,7 +43,7 @@ export default function ResultCard({ result, organName, sampleType, caseCode, cr
         </div>
       </div>
 
-      <div className="p-5 sm:p-8"><p className="mb-4 text-sm text-slate-600">Protocollo: {result.protocol ?? "Da specificare"} · versione 0.2.0</p>
+      <div className="p-5 sm:p-8"><p className="mb-4 text-sm text-slate-600">Protocollo: {result.protocol ?? "Da specificare"}</p>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex h-24 w-24 flex-col items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg sm:h-28 sm:w-28">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Score IHC</span>

@@ -64,7 +64,7 @@ export async function fetchCriteria(organ?: string): Promise<Criterion[]> { retu
 export async function fetchGuidelines(): Promise<Guideline[]> { return guidelines; }
 function readHistory(): Evaluation[] {
   const parsed: unknown = JSON.parse(localStorage.getItem(KEY) || '[]');
-  if (!Array.isArray(parsed) || parsed.some(e => !e || e.algorithm_version !== '0.2.0' || !e.result_snapshot)) throw new Error('Storico non valido o versione non compatibile. Nessun dato sovrascritto.');
+  if (!Array.isArray(parsed) || parsed.some(e => !e || !['0.2.0','0.2.1'].includes(e.algorithm_version) || !e.result_snapshot)) throw new Error('Storico non valido o versione non compatibile. Nessun dato sovrascritto.');
   return parsed as Evaluation[];
 }
 export async function fetchEvaluations(params?: {organ?:string;category?:string;q?:string}): Promise<Evaluation[]> {

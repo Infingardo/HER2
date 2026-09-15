@@ -16,7 +16,7 @@ export default function App() {
     (async () => {
       try {
         const [o, c, g] = await Promise.all([fetchOrgans(), fetchCriteria(), fetchGuidelines()]);
-        setStats({ organs: o.filter(x => ["mammella","stomaco","colonretto"].includes(x.code)).length, criteria: c.length, guidelines: g.length });
+        setStats({ organs: o.filter(x => ["mammella","stomaco","colonretto","vescica"].includes(x.code)).length, criteria: c.length, guidelines: g.length });
       } catch {
         /* statistiche non critiche */
       }
@@ -46,7 +46,7 @@ export default function App() {
               Score HER2 immunoistochimico
             </h1>
             <p className="mt-3 text-[15px] leading-relaxed text-teal-50/90">
-              Descrivi il reperto e applica un protocollo esplicito per mammella, stomaco o colon-retto. I risultati non valutabili e i pattern ambigui vengono segnalati senza assegnare uno score negativo.
+              Descrivi il reperto e applica un protocollo esplicito per mammella, stomaco, colon-retto o carcinoma uroteliale su resezione. I risultati non valutabili e i pattern ambigui vengono segnalati senza assegnare uno score negativo.
 
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -91,7 +91,7 @@ export default function App() {
             <Scale className="mb-2 h-5 w-5 text-teal-700" />
             <p className="text-sm font-bold text-slate-900">Algoritmi dedicati</p>
             <p className="mt-1 text-sm text-slate-500">
-              Mammella (ASCO/CAP 2023), stomaco (CAP/ASCP/ASCO), colon-retto (HERACLES). Altri organi: protocollo da implementare.
+              Mammella (ASCO/CAP 2023), stomaco (CAP/ASCP/ASCO), colon-retto (HERACLES). Carcinoma uroteliale: criteri gastrici dichiarati su resezione. Altri organi: protocollo da implementare.
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-4">

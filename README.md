@@ -1,6 +1,6 @@
 # HER2-Score IHC
 
-Versione autonoma 0.2.0, revisione del 15 settembre 2026 del progetto esportato da DesignArena.
+Versione autonoma 0.2.1, revisione del 15 settembre 2026 del progetto esportato da DesignArena.
 
 ## Avvio
 
@@ -24,8 +24,8 @@ La cartella `dist` è il sito statico compilato. La configurazione Vercel non co
 
 ## Comportamento
 
-- Tre protocolli attivi: mammella ASCO/CAP 2023, stomaco CAP/ASCP/ASCO 2016–2017, colon-retto HERACLES.
-- Gli altri otto organi restano visibili ma non selezionabili: richiedono protocollo, istotipo e finalità del test identificati. Nessuna estrapolazione gastrica automatica.
+- Protocolli attivi: mammella ASCO/CAP 2023, stomaco CAP/ASCP/ASCO 2016–2017, colon-retto HERACLES e carcinoma uroteliale su resezione con criteri gastrici dichiarati.
+- Gli altri sette organi restano visibili ma non selezionabili: richiedono protocollo, istotipo e finalità del test identificati. Nessuna estrapolazione gastrica automatica.
 - Score nullo e messaggio esplicito per dati discordanti, controlli non validi o reperti non risolvibili con gli input disponibili.
 - Pattern incompleto distinto da estensione focale. “Debole-moderata incompleta” richiede revisione perché l’input legacy raggruppa intensità diverse.
 - Nessuna indicazione farmacologica o eleggibilità terapeutica automatica.
@@ -40,7 +40,7 @@ Lo ZIP originale conteneva in `vercel.json` una chiave con prefisso `sb_secret_`
 
 ## Risultati della verifica
 
-24 test superati: scoring, soglie, 4.928 combinazioni per gli invarianti, rendering server del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
+25 test superati: scoring, soglie, 4.928 combinazioni per gli invarianti, rendering server del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
 
 ## Limiti clinici
 
@@ -59,4 +59,6 @@ Le versioni dei protocolli sono dichiarate, non aggiornate automaticamente. La p
 
 ## GitHub
 
-Progetto pronto per un repository dedicato. Sorgenti caricati nel repository GitHub; nessun deploy del sito eseguito. Per il primo caricamento usare questi sorgenti puliti, escludendo `node_modules` e `dist` come da `.gitignore`.
+Progetto pronto per un repository dedicato. Sorgenti presenti su GitHub; nessun deploy eseguito. Per il primo caricamento usare questi sorgenti puliti, escludendo `node_modules` e `dist` come da `.gitignore`.
+
+Aggiornamento uroteliale: supportata la resezione con protocollo gastrico esplicito; biopsie sospese in attesa di precisazione del protocollo quantitativo. Nessun referto o dato paziente incluso nel repository.

@@ -130,7 +130,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
         controls_valid: controlsValid,
         score: result.score,
         result_snapshot: result,
-        algorithm_version: "0.2.0",
+        algorithm_version: "0.2.1",
         cytoplasmic_only: cytoplasmicOnly,
         modifier: result.modifier,
         category: result.category,
@@ -209,7 +209,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
           >
             <h2 className="text-xl font-extrabold text-slate-900">1. Seleziona l&apos;organo / sede tumorale</h2>
             <p className="mb-5 mt-1 text-sm text-slate-500">
-              Tre protocolli implementati. Gli altri organi richiedono un algoritmo dedicato e non sono selezionabili.
+              Quattro sedi implementate (uroteliale: resezione con criteri gastrici dichiarati). Gli altri organi richiedono un algoritmo dedicato e non sono selezionabili.
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {organs.map((o) => {
@@ -217,7 +217,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                 return (
                   <button
                     key={o.code}
-                    disabled={!['mammella', 'stomaco', 'colonretto'].includes(o.code)}
+                    disabled={!['mammella', 'stomaco', 'colonretto', 'vescica'].includes(o.code)}
                     onClick={() => { setOrgan(o.code as OrganCode); setIntensity(null); setPattern(null); setPercent(0); setCluster5(false); setSaved(false); }}
                     className={`flex items-start gap-3 rounded-xl border-2 p-4 text-left transition ${
                       selected
@@ -274,7 +274,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                   {sampleType === 'biopsia' && <Check className="h-4 w-4 text-teal-600" />}
                 </span>
                 <span className="mt-1 block text-sm text-slate-500">
-                  {organ === 'mammella' || organ === 'colonretto'
+                  {organ === 'vescica' ? 'Biopsia uroteliale: scoring sospeso finché il protocollo quantitativo non è specificato.' : organ === 'mammella' || organ === 'colonretto'
                     ? 'Stesse soglie percentuali del pezzo chirurgico (>10% mammella; HERACLES nel colon).'
                     : 'Criterio del cluster: basta un cluster di ≥5 cellule coesive colorate (nessuna %).'}
                 </span>

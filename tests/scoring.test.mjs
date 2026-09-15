@@ -39,7 +39,7 @@ test('CRC intensità distinta dallo stato', () => {
  assert.equal(run({organ:'colonretto',intensity:'debole_moderata',percent:50}).ish,true);
 });
 test('Nessuna estrapolazione gastrica', () => {
- for (const organ of ['vescica','endometrio','polmone','ovaio','biliari','pancreas','cervice','altri']) {
+ for (const organ of ['endometrio','polmone','ovaio','biliari','pancreas','cervice','altri']) {
   assert.equal(run({organ}).status,'unsupported');assert.equal(run({organ}).score,null);
   assert.equal(usesCluster(organ,'biopsia'),false);assert.equal(usesPercent(organ,'resezione'),false);
  }
@@ -49,4 +49,12 @@ test('Nessuna indicazione terapeutica automatica, invarianti su tutte le combina
  const r=run({organ,sampleType,intensity,pattern,percent,cluster5});assert.equal(r.therapy,null);
  if(r.status!=='scored'){assert.equal(r.score,null);assert.equal(r.ish,false);assert.notEqual(r.category,'Positivo');}
  }
+});
+
+test('Uroteliale: criteri gastrici dichiarati solo su resezione',()=>{
+ const r=run({organ:'vescica',intensity:'debole_moderata',pattern:'basolaterale',percent:30});
+ assert.equal(r.score,'2+');assert.equal(r.category,'Equivoco');assert.equal(r.ish,false);assert.match(r.protocol,/uroteliale/);
+ assert.equal(run({organ:'vescica',percent:10}).score,'3+');
+ assert.equal(run({organ:'vescica',sampleType:'biopsia',cluster5:true}).score,null);
+ assert.equal(usesCluster('vescica','biopsia'),false);
 });

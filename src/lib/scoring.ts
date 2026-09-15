@@ -52,7 +52,7 @@ export const ORGAN_NAMES: Record<OrganCode, string> = {
   mammella: 'Mammella',
   stomaco: 'Stomaco / GEJ',
   colonretto: 'Colon-retto',
-  vescica: 'Vescica',
+  vescica: 'Carcinoma uroteliale (vescica / alte vie)',
   endometrio: 'Endometrio',
   polmone: 'Polmone (NSCLC)',
   ovaio: 'Ovaio',
@@ -74,7 +74,7 @@ export const PANTUMOR_ORGANS: OrganCode[] = [
 ];
 
 export function usesPercent(organ: OrganCode, sampleType: SampleType): boolean {
-  if (organ === 'mammella' || organ === 'colonretto') return true;
+  if (organ === 'mammella' || organ === 'colonretto' || organ === 'vescica') return true;
   return organ === 'stomaco' && sampleType === 'resezione';
 }
 
@@ -127,6 +127,7 @@ function buildObserved(input: ScoringInput): string {
 const PROTOCOLS: Partial<Record<OrganCode, string>> = {
   mammella: 'ASCO/CAP mammella 2023 (carcinoma invasivo)',
   stomaco: 'CAP/ASCP/ASCO gastroesofageo 2016–2017',
+  vescica: 'Criteri gastrici CAP/ASCP/ASCO 2016–2017 applicati al carcinoma uroteliale — resezione',
   colonretto: 'HERACLES; sintesi CAP 2024 (non algoritmo CRC universale)',
 };
 
@@ -229,8 +230,19 @@ export function computeScore(input: ScoringInput): ScoringResult {
   if (!absent && usesPercent(input.organ, input.sampleType) && input.percent === 0)
     return blocked(input, 'invalid', 'Reattività presente ma percentuale pari a zero.');
   if (!hasOwn(PROTOCOLS, input.organ)) return blocked(input, 'unsupported', 'Per questo organo il motore non dispone di un protocollo verificato. Non si applicano automaticamente i criteri gastrici.');
+  if (input.organ === 'vescica' && input.sampleType === 'biopsia') return blocked(input, 'review', 'Biopsia uroteliale: specificare il protocollo quantitativo adottato. La soglia gastrica del cluster di cinque cellule non viene trasferita automaticamente.');
   if (absent) return result(input, '0', 'Assenza di reattività di membrana.', { modifier: input.cytoplasmicOnly ? 'sola reattività citoplasmatica' : null });
   if (input.organ === 'mammella') return breast(input);
   if (input.organ === 'stomaco') return gastric(input);
+  if (input.organ === 'vescica') {
+    const scored = gastric(input);
+    scored.notes.push('Applicazione esplicita di criteri gastrici a carcinoma uroteliale su resezione; non algoritmo universale per tutti i tumori urinari.');
+    if (scored.status === 'scored' && scored.score === '2+') {
+      scored.her2Status = 'Espressione IHC 2+; stato integrato non definito';
+      scored.action = 'Riportare score 2+ e protocollo. Eventuale ISH secondo finalità clinica e protocollo adottato; nessuna eleggibilità terapeutica automatica.';
+      scored.ish = false;
+    }
+    return scored;
+  }
   return crc(input);
 }
