@@ -16,6 +16,7 @@ function guidelineVisible(g: Guideline, organCode: string): boolean {
 
 function sampleLabel(s: string): string {
   if (s === 'biopsia') return 'Biopsia';
+  if (s === 'turb') return 'TURB';
   if (s === 'resezione') return 'Pezzo chirurgico';
   return 'Biopsia e pezzo chirurgico';
 }

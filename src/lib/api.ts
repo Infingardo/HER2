@@ -77,4 +77,4 @@ export async function saveEvaluation(payload: Record<string, unknown>): Promise<
   return row;
 }
 export async function deleteEvaluation(id:number):Promise<void> {localStorage.setItem(KEY,JSON.stringify(readHistory().filter(e=>e.id!==id)));}
-export function sampleTypeLabel(v:string):string {return v === 'biopsia' ? 'Biopsia' : v === 'resezione' ? 'Pezzo chirurgico' : v;}
+export function sampleTypeLabel(v:string):string {return v === 'biopsia' ? 'Biopsia' : v === 'turb' ? 'TURB' : v === 'resezione' ? 'Pezzo chirurgico' : v;}

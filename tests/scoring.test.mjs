@@ -29,13 +29,33 @@ test('Membrana assente + intensità forte non genera score per alcun organo', ()
 test('Input invalidi', () => {
  for (const patch of [{percent:NaN},{percent:Infinity},{percent:-1},{percent:101},{percent:0},{organ:'__proto__'},{organ:'unknown'},{intensity:'x'},{controlsValid:'true'},{cytoplasmicOnly:true},{intensity:'assente',pattern:'assente',cluster5:true,percent:0}]) assert.equal(run(patch).status,'invalid');
 });
-test('Pattern ambiguo non diventa 0', () => {
- for (const patch of [{intensity:'debole_moderata',pattern:'incompleta'},{intensity:'debole'},{organ:'stomaco',pattern:'incompleta'},{organ:'colonretto',percent:10}]) {const r=run(patch);assert.equal(r.status,'review');assert.equal(r.score,null);}
+test('Pattern ambiguo produce uno score dichiarato, mai un 0 silenzioso', () => {
+ for (const patch of [{intensity:'debole_moderata',pattern:'incompleta'},{intensity:'debole',pattern:'completa'},{organ:'stomaco',pattern:'incompleta'},{organ:'colonretto',percent:10}]) {
+  const r=run(patch);
+  assert.equal(r.status,'scored','deve restituire uno score, non un vicolo cieco');
+  assert.notEqual(r.score,null);
+  if(r.score==='0') assert.match(String(r.modifier),/membrana/,'un 0 da pattern ambiguo deve dichiarare la colorazione di membrana');
+  else assert.ok(r.notes.some(n=>/non testualmente inclusa|protocollo gastrico|HERACLES/.test(n)),'deve dichiarare il criterio applicato');
+ }
+});
+test('Nessuna combinazione valida resta senza risposta negli organi supportati', () => {
+ let senzaScore=0, totali=0;
+ for (const organ of ['mammella','stomaco','colonretto','vescica']) for(const sampleType of ['biopsia','turb','resezione'])
+  for(const intensity of ['debole','debole_moderata','forte']) for(const pattern of ['completa','incompleta','basolaterale'])
+   for(const percent of [1,5,10,10.1,49.9,50,100]) for(const cluster5 of [true,false]) {
+    if(sampleType==='turb' && organ!=='vescica') continue; // combinazione non producibile dall'interfaccia
+    const r=run({organ,sampleType,intensity,pattern,percent,cluster5});
+    totali++;
+    if(r.score===null) senzaScore++;
+   }
+ assert.ok(totali>1000);
+ assert.equal(senzaScore, 0, 'nessun vicolo cieco residuo negli organi supportati');
 });
 test('CRC intensità distinta dallo stato', () => {
  assert.equal(run({organ:'colonretto',percent:49.9}).category,'Equivoco');
  assert.equal(run({organ:'colonretto',percent:49.9}).ish,true);
  assert.equal(run({organ:'colonretto',percent:9}).category,'Negativo');
+ assert.equal(run({organ:'colonretto',percent:10}).category,'Equivoco');
  assert.equal(run({organ:'colonretto',intensity:'debole_moderata',percent:50}).ish,true);
 });
 test('Nessuna estrapolazione gastrica', () => {
@@ -45,7 +65,7 @@ test('Nessuna estrapolazione gastrica', () => {
  }
 });
 test('Nessuna indicazione terapeutica automatica, invarianti su tutte le combinazioni', () => {
- for (const organ of Object.keys(ORGAN_NAMES)) for(const sampleType of ['biopsia','resezione']) for(const intensity of ['assente','debole','debole_moderata','forte']) for(const pattern of ['assente','completa','incompleta','basolaterale']) for(const percent of [0,5,10,10.1,49.9,50,100]) for(const cluster5 of [true,false]) {
+ for (const organ of Object.keys(ORGAN_NAMES)) for(const sampleType of ['biopsia','turb','resezione']) for(const intensity of ['assente','debole','debole_moderata','forte']) for(const pattern of ['assente','completa','incompleta','basolaterale']) for(const percent of [0,5,10,10.1,49.9,50,100]) for(const cluster5 of [true,false]) {
  const r=run({organ,sampleType,intensity,pattern,percent,cluster5});assert.equal(r.therapy,null);
  if(r.status!=='scored'){assert.equal(r.score,null);assert.equal(r.ish,false);assert.notEqual(r.category,'Positivo');}
  }
@@ -55,6 +75,39 @@ test('Uroteliale: criteri gastrici dichiarati solo su resezione',()=>{
  const r=run({organ:'vescica',intensity:'debole_moderata',pattern:'basolaterale',percent:30});
  assert.equal(r.score,'2+');assert.equal(r.category,'Equivoco');assert.equal(r.ish,false);assert.match(r.protocol,/uroteliale/);
  assert.equal(run({organ:'vescica',percent:10}).score,'3+');
- assert.equal(run({organ:'vescica',sampleType:'biopsia',cluster5:true}).score,null);
- assert.equal(usesCluster('vescica','biopsia'),false);
+ assert.equal(run({organ:'vescica',sampleType:'biopsia',cluster5:true}).score,'3+');
+ assert.equal(usesCluster('vescica','biopsia'),true);
+ assert.equal(usesPercent('vescica','biopsia'),false);
+});
+
+test('TURB uroteliale: criteri da campione resettivo, non da biopsia', () => {
+ const turb = run({organ:'vescica',sampleType:'turb',intensity:'forte',pattern:'basolaterale',percent:15,cluster5:false});
+ assert.equal(turb.score,'3+');
+ assert.equal(usesPercent('vescica','turb'),true);
+ assert.equal(usesCluster('vescica','turb'),false);
+ assert.ok(turb.notes.some(n=>/TURB trattata come campione resettivo/.test(n)));
+ // sotto soglia ma con componente intensa: va segnalata perche' il T-DXd agnostico e' ancorato al 3+
+ const focale = run({organ:'vescica',sampleType:'turb',intensity:'forte',pattern:'basolaterale',percent:5,cluster5:false});
+ assert.equal(focale.score,'0');
+ assert.ok(focale.notes.some(n=>/<10% delle cellule/.test(n)));
+ assert.ok(focale.notes.some(n=>/trastuzumab deruxtecan/.test(n)));
+});
+
+test('Biopsia uroteliale sbloccata con regola del cluster dichiarata', () => {
+ const b = run({organ:'vescica',sampleType:'biopsia',intensity:'debole_moderata',pattern:'basolaterale',percent:0,cluster5:true});
+ assert.equal(b.score,'2+');
+ assert.ok(b.notes.some(n=>/regola gastrica del cluster/.test(n)));
+ const senzaCluster = run({organ:'vescica',sampleType:'biopsia',intensity:'forte',pattern:'basolaterale',percent:0,cluster5:false});
+ assert.equal(senzaCluster.score,'0');
+ assert.ok(senzaCluster.notes.some(n=>/prelievo più ampio/.test(n)));
+});
+
+test('TURB accettata solo sull\u2019uroteliale', () => {
+ for (const organ of ['mammella','stomaco','colonretto']) {
+  const r = run({organ,sampleType:'turb'});
+  assert.equal(r.status,'invalid');
+  assert.equal(r.score,null);
+  assert.match(r.interpretation,/TURB prevista solo/);
+ }
+ assert.equal(run({organ:'vescica',sampleType:'turb',pattern:'basolaterale',percent:15}).score,'3+');
 });

@@ -24,13 +24,43 @@ La cartella `dist` è il sito statico compilato. La configurazione Vercel non co
 
 ## Comportamento
 
-- Protocolli attivi: mammella ASCO/CAP 2023, stomaco CAP/ASCP/ASCO 2016–2017, colon-retto HERACLES e carcinoma uroteliale su resezione con criteri gastrici dichiarati.
+- Protocolli attivi: mammella ASCO/CAP 2023, stomaco CAP/ASCP/ASCO 2016–2017, colon-retto HERACLES e carcinoma uroteliale con criteri gastrici dichiarati (biopsia, TURB e pezzo operatorio).
 - Gli altri sette organi restano visibili ma non selezionabili: richiedono protocollo, istotipo e finalità del test identificati. Nessuna estrapolazione gastrica automatica.
 - Score nullo e messaggio esplicito per dati discordanti, controlli non validi o reperti non risolvibili con gli input disponibili.
 - Pattern incompleto distinto da estensione focale. “Debole-moderata incompleta” richiede revisione perché l’input legacy raggruppa intensità diverse.
 - Nessuna indicazione farmacologica o eleggibilità terapeutica automatica.
 - Storico nel browser corrente (`localStorage`), con snapshot completo e versione del motore. Non condiviso tra dispositivi; cancellare i dati del browser cancella lo storico. Usare codici di prova senza identificativi dei pazienti. Esportazione CSV disponibile.
 - I dati del vecchio database non sono migrati: lo ZIP sorgente non conteneva le tabelle. Catalogo dei criteri e riferimenti ora incluso nel progetto.
+
+## Combinazioni non previste dalla guideline
+
+ASCO/CAP definisce testualmente quattro combinazioni di intensita e pattern; le altre esistono al microscopio ma non nel testo. Il motore non le lascia senza risposta e non le converte in un IHC 0 silenzioso: assegna lo score piu prudente compatibile con la guideline e lo dichiara nelle note del risultato.
+
+- Mammella, reattivita intensa non circonferenziale: 2+, quindi ISH. Il rischio di mancare un caso amplificato supera quello di una ISH in piu.
+- Mammella, reattivita debole-moderata non circonferenziale: 1+. La membrana completa e requisito del 2+; l'1+ resta una categoria clinicamente significativa.
+- Mammella, reattivita tenue ma completa: 1+, con invito a rivedere l'intensita perche la distinzione da debole-moderata decide la ISH.
+- Gastrico e HERACLES, membrana incompleta non laterale: 1+, non qualificante per 2+ e 3+; se al microscopio il pattern e laterale o basolaterale va riselezionato.
+- HERACLES, reattivita intensa esattamente al 10%: equivoco, quindi ISH. Le sintesi pubblicate divergono sul confine e la scelta conservativa e dichiarata.
+
+Nessuna combinazione valida resta senza score negli organi supportati: la verifica è nella suite di test, che percorre tutte le combinazioni di organo, tipo di campione, intensità, pattern ed estensione.
+
+## Carcinoma uroteliale
+
+Non esiste un algoritmo uroteliale validato. Si applicano i criteri gastrici CAP/ASCP/ASCO 2016-2017, dichiarati nel risultato, coerentemente con la prassi prevalente (criteri del gastrico, amplificazione spesso non eseguita) e con l'impostazione di DESTINY-PanTumor02.
+
+Il tipo di campione ha tre voci, e la discriminante non è la via di prelievo ma l'affidabilità del denominatore:
+
+- **Biopsia** (pinza endoscopica o ureteroscopica): regola del cluster di almeno 5 cellule coesive. Su un prelievo minimo la percentuale non è misurabile.
+- **TURB**: soglia del 10%, come il pezzo operatorio. La TURB è un campione resettivo frammentato, il tumore valutabile è abbondante e la percentuale ha un denominatore reale.
+- **Pezzo operatorio**: soglia del 10%.
+
+Quando è presente una componente con reattività intensa (qualità 3+) ma sotto la soglia del protocollo, il risultato lo segnala esplicitamente: l'eleggibilità agnostica a trastuzumab deruxtecan è ancorata all'IHC 3+, quindi una componente 3+ focale è un dato che l'oncologo deve vedere anche quando lo score complessivo e' 0.
+
+Nota sul perimetro: DESTINY-PanTumor02 ha arruolato IHC 3+ e 2+ senza ISH, ma l'approvazione tumor-agnostica che ne è derivata copre il solo IHC 3+. Popolazione arruolata e popolazione approvata non coincidono.
+
+## Deploy
+
+`.github/workflows/pages.yml` pubblica `dist` su GitHub Pages a ogni push su `main`, dopo test, lint e build. Va abilitato una volta in Settings > Pages > Source: GitHub Actions.
 
 ## Differenze rispetto all’export
 

@@ -24,16 +24,16 @@ import { criteria as allCriteria } from '../lib/catalog';
 
 const INTENSITIES: { value: Intensity; label: string; desc: string; swatch: string }[] = [
   { value: 'assente', label: 'Assente', desc: 'Nessuna colorazione di membrana', swatch: 'bg-slate-100 border-slate-300' },
-  { value: 'debole', label: 'Debole / appena percettibile', desc: 'Visibile solo a forte ingrandimento (40x)', swatch: 'bg-amber-100 border-amber-300' },
-  { value: 'debole_moderata', label: 'Debole-moderata', desc: 'Chiaramente visibile a 10-20x', swatch: 'bg-orange-200 border-orange-400' },
-  { value: 'forte', label: 'Forte / intensa', desc: 'Evidente anche a piccolo ingrandimento', swatch: 'bg-orange-800 border-orange-900' },
+  { value: 'debole', label: 'Tenue / appena percettibile', desc: 'Si vede solo a 40x (faint / barely perceptible)', swatch: 'bg-amber-100 border-amber-300' },
+  { value: 'debole_moderata', label: 'Debole-moderata', desc: 'Chiaramente visibile a 10-20x (weak to moderate)', swatch: 'bg-orange-200 border-orange-400' },
+  { value: 'forte', label: 'Intensa', desc: 'Evidente a piccolo ingrandimento (strong / intense)', swatch: 'bg-orange-800 border-orange-900' },
 ];
 
 const PATTERNS: { value: MembranePattern; label: string; desc: string }[] = [
-  { value: 'completa', label: 'Completa e circonferenziale', desc: 'Intera membrana (chicken-wire)' },
-  { value: 'incompleta', label: 'Incompleta', desc: 'Tratti di membrana, polarità conservata' },
-  { value: 'basolaterale', label: 'Basolaterale / laterale', desc: 'Tipica delle ghiandole (stomaco, colon)' },
-  { value: 'assente', label: 'Assente', desc: 'Nessuna reattività di membrana' },
+  { value: 'completa', label: 'Completa e circonferenziale', desc: 'Intera membrana (chicken-wire). Requisito di 2+ e 3+ in mammella' },
+  { value: 'incompleta', label: 'Incompleta, non laterale', desc: 'Tratti di membrana senza polarita definita. Non qualificante per 2+ e 3+' },
+  { value: 'basolaterale', label: 'Basolaterale / laterale', desc: 'Polarita ghiandolare. Valido per 2+ e 3+ nei protocolli gastrico e HERACLES' },
+  { value: 'assente', label: 'Assente', desc: 'Nessuna reattivita di membrana' },
 ];
 
 const STEPS = [
@@ -209,7 +209,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
           >
             <h2 className="text-xl font-extrabold text-slate-900">1. Seleziona l&apos;organo / sede tumorale</h2>
             <p className="mb-5 mt-1 text-sm text-slate-500">
-              Quattro sedi implementate (uroteliale: resezione con criteri gastrici dichiarati). Gli altri organi richiedono un algoritmo dedicato e non sono selezionabili.
+              Quattro sedi implementate (uroteliale: criteri gastrici dichiarati, con TURB trattata come campione resettivo). Gli altri organi richiedono un algoritmo dedicato e non sono selezionabili.
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {organs.map((o) => {
@@ -218,7 +218,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                   <button
                     key={o.code}
                     disabled={!['mammella', 'stomaco', 'colonretto', 'vescica'].includes(o.code)}
-                    onClick={() => { setOrgan(o.code as OrganCode); setIntensity(null); setPattern(null); setPercent(0); setCluster5(false); setSaved(false); }}
+                    onClick={() => { setOrgan(o.code as OrganCode); setSampleType('resezione'); setIntensity(null); setPattern(null); setPercent(0); setCluster5(false); setSaved(false); }}
                     className={`flex items-start gap-3 rounded-xl border-2 p-4 text-left transition ${
                       selected
                         ? 'border-teal-600 bg-teal-50 shadow-md shadow-teal-100'
@@ -258,9 +258,9 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
           >
             <h2 className="text-xl font-extrabold text-slate-900">2. Tipo di campione</h2>
             <p className="mb-5 mt-1 text-sm text-slate-500">
-              {organObj?.name}: le soglie quantitative cambiano tra biopsia e pezzo chirurgico nel protocollo gastrico.
+              {organObj?.name}: le soglie quantitative cambiano con la quantità di tumore valutabile. Il criterio del cluster nasce dall&apos;inaffidabilità del denominatore su pinza endoscopica, non dalla via di prelievo.
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className={`grid gap-3 ${organ === 'vescica' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
               <button
                 onClick={() => { setSampleType('biopsia'); setPercent(0); setCluster5(false); setSaved(false); }}
                 className={`rounded-xl border-2 p-5 text-left transition ${
@@ -274,11 +274,29 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                   {sampleType === 'biopsia' && <Check className="h-4 w-4 text-teal-600" />}
                 </span>
                 <span className="mt-1 block text-sm text-slate-500">
-                  {organ === 'vescica' ? 'Biopsia uroteliale: scoring sospeso finché il protocollo quantitativo non è specificato.' : organ === 'mammella' || organ === 'colonretto'
+                  {organ === 'vescica' ? 'Pinza endoscopica / ureteroscopica: criterio del cluster di ≥5 cellule coesive, regola gastrica dichiarata.' : organ === 'mammella' || organ === 'colonretto'
                     ? 'Stesse soglie percentuali del pezzo chirurgico (>10% mammella; HERACLES nel colon).'
                     : 'Criterio del cluster: basta un cluster di ≥5 cellule coesive colorate (nessuna %).'}
                 </span>
               </button>
+              {organ === 'vescica' && (
+                <button
+                  onClick={() => { setSampleType('turb'); setPercent(0); setCluster5(false); setSaved(false); }}
+                  className={`rounded-xl border-2 p-5 text-left transition ${
+                    sampleType === 'turb'
+                      ? 'border-teal-600 bg-teal-50 shadow-md shadow-teal-100'
+                      : 'border-slate-200 hover:border-teal-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-base font-bold text-slate-900">
+                    TURB
+                    {sampleType === 'turb' && <Check className="h-4 w-4 text-teal-600" />}
+                  </span>
+                  <span className="mt-1 block text-sm text-slate-500">
+                    Campione resettivo frammentato: soglia ≥10%, come il pezzo operatorio. Il tumore valutabile è abbondante e la percentuale è misurabile.
+                  </span>
+                </button>
+              )}
               <button
                 onClick={() => { setSampleType('resezione'); setPercent(0); setCluster5(false); setSaved(false); }}
                 className={`rounded-xl border-2 p-5 text-left transition ${
@@ -300,7 +318,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                 </span>
               </button>
             </div>
-            {organ === 'stomaco' && sampleType === 'biopsia' && (
+            {(organ === 'stomaco' || organ === 'vescica') && sampleType === 'biopsia' && (
               <div className="mt-4 flex gap-3 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
                 <Info className="h-5 w-5 shrink-0" />
                 <p>
@@ -322,7 +340,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
           >
             <h2 className="text-xl font-extrabold text-slate-900">3. Reperto microscopico</h2>
             <p className="mb-5 mt-1 text-sm text-slate-500">
-              Descrivi intensità, pattern di membrana ed estensione della colorazione nelle cellule tumorali.
+              Descrivi intensità, pattern di membrana ed estensione della colorazione nelle cellule tumorali. Intensità e pattern usano il vocabolario ASCO/CAP: se una combinazione non è testualmente prevista dalla guideline, lo score viene comunque assegnato e il criterio applicato è dichiarato nel risultato.
             </p>
 
             <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-600">Intensità di membrana</h3>
@@ -484,7 +502,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
                       (c) =>
                         c.sample_type === 'entrambi' ||
                         (sampleType === 'biopsia' && c.sample_type === 'biopsia') ||
-                        (sampleType === 'resezione' && c.sample_type === 'resezione')
+                        (sampleType !== 'biopsia' && c.sample_type === 'resezione')
                     )
                     .map((c) => (
                       <div
@@ -501,7 +519,7 @@ export default function Calculator({ onSaved }: { onSaved: () => void }) {
 
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-600">Archivia nel browser</h3><p className="mb-3 text-sm text-slate-500">I dati restano su questo dispositivo e possono andare persi cancellando i dati del browser. Usa codici di prova, senza dati identificativi.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className={`grid gap-3 ${organ === 'vescica' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
                 <label className="block">
                   <span className="mb-1 block text-xs font-bold text-slate-500">Codice caso</span>
                   <input
