@@ -32,6 +32,7 @@ export interface ScoringInput {
 }
 
 export interface ScoringResult {
+  organ: OrganCode;
   score: '0' | '1+' | '2+' | '3+' | null;
   status: 'scored' | 'invalid' | 'review' | 'unsupported';
   protocol: string | null;
@@ -142,7 +143,7 @@ function result(input: ScoringInput, score: ScoringResult['score'], interpretati
   options: Partial<ScoringResult> = {}): ScoringResult {
   const equivocal = score === '2+';
   return {
-    score, status: 'scored', protocol: PROTOCOLS[input.organ] ?? null,
+    organ: input.organ, score, status: 'scored', protocol: PROTOCOLS[input.organ] ?? null,
     modifier: null, observed: buildObserved(input),
     category: score === '3+' ? 'Positivo' : equivocal ? 'Equivoco' : 'Negativo',
     her2Status: score === '3+' ? 'IHC positivo (3+)' : equivocal ? 'IHC equivoco; stato integrato da definire' : `IHC negativo (${score})`,

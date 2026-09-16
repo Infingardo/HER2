@@ -16,8 +16,12 @@ function classification(result: ScoringResult): string {
   return result.category;
 }
 
+// Conclusione descrittiva limitata al flusso uroteliale adottato: documenta IHC 3+,
+// non eleggibilità terapeutica. Non generalizzare agli altri organi: l'assenza
+// di IHC 3+ non definisce da sola lo stato HER2 integrato (es. gastrico 2+/ISH+).
+// L'organo è un dato strutturale; il testo del protocollo è solo un'etichetta.
 function urothelialConclusion(result: ScoringResult): string | null {
-  if (!result.protocol?.includes('carcinoma uroteliale') || result.score === null) return null;
+  if (result.organ !== 'vescica' || result.score === null) return null;
   if (result.score === '3+') return 'Nel campione è documentata espressione HER2 IHC 3+ secondo i criteri gastrici applicati.';
   return `Nel campione non si documenta espressione HER2 IHC 3+ secondo i criteri gastrici applicati (score IHC ${result.score}).`;
 }

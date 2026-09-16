@@ -70,3 +70,20 @@ test('Referto uroteliale 2+ non lo presenta come positivo né come IHC 3+', () =
  assert.match(t, /non si documenta espressione HER2 IHC 3\+/i);
  assert.doesNotMatch(t, /Classificazione:.*positiv/i);
 });
+
+test('Conclusione uroteliale indipendente da etichetta e maiuscole del protocollo', () => {
+ const result=computeScore({...base,organ:'vescica',intensity:'debole_moderata'});
+ for(const protocol of ['ETICHETTA COMPLETAMENTE RISCRITTA',null]) {
+  const text=buildReportText({...result,protocol},{organName:'Uroteliale',sampleTypeLabel:'Resezione'});
+  assert.match(text,/Conclusione: Nel campione non si documenta espressione HER2 IHC 3\+/);
+ }
+});
+test('Gastrico: nessuna conclusione uroteliale anche con etichetta ingannevole', () => {
+ const result=computeScore({...base,organ:'stomaco',intensity:'debole_moderata'});
+ const text=buildReportText({...result,protocol:'carcinoma uroteliale'},{organName:'Stomaco',sampleTypeLabel:'Resezione'});
+ assert.doesNotMatch(text,/Conclusione:/);
+});
+test('Uroteliale non valutabile: nessuna conclusione di assenza di IHC 3+',()=>{
+ const text=build({organ:'vescica',controlsValid:false});
+ assert.match(text,/Score: non assegnato/);assert.doesNotMatch(text,/Conclusione:/);
+});

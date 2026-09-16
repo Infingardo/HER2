@@ -72,6 +72,16 @@ Classificazione: IHC equivoco; stato integrato da definire
 
 Le note metodologiche finiscono nel blocco: su un uroteliale sotto soglia con componente intensa, la segnalazione della componente 3+ focale arriva nel referto insieme alla ragione per cui conta.
 
+La riga **Conclusione** è presente soltanto nel flusso uroteliale, quando lo score è assegnato:
+
+```
+Score IHC: 2+
+Classificazione: Espressione IHC 2+; stato integrato non definito
+Conclusione: Nel campione non si documenta espressione HER2 IHC 3+ secondo i criteri gastrici applicati (score IHC 2+).
+```
+
+È una documentazione del reperto, non una dichiarazione di eleggibilità. Non estenderla automaticamente agli altri organi: l'assenza di IHC 3+ non determina lo stato HER2 integrato. L'attivazione dipende da `result.organ`, non dal testo modificabile del protocollo. Gli snapshot precedenti privi di `organ` lo recuperano da `organ_code`, senza ricalcolare lo score né modificare lo storico durante la lettura. Dati organo mancanti o discordanti bloccano la lettura anziché produrre una conclusione impropria.
+
 ## Deploy
 
 `.github/workflows/pages.yml` pubblica `dist` su GitHub Pages a ogni push su `main`, dopo test, lint e build. Va abilitato una volta in Settings > Pages > Source: GitHub Actions.
@@ -84,7 +94,7 @@ Lo ZIP originale conteneva in `vercel.json` una chiave con prefisso `sb_secret_`
 
 ## Risultati della verifica
 
-35 test superati: scoring, soglie, 7.392 combinazioni per gli invarianti, 1.134 combinazioni producibili dall'interfaccia verificate tutte con uno score assegnato, testo del referto (score e classificazione su righe separate, assenza di indicazioni terapeutiche per ogni organo), rendering del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
+42 test superati: scoring, soglie, 7.392 combinazioni per gli invarianti, 1.134 combinazioni producibili dall'interfaccia verificate tutte con uno score assegnato, testo del referto (score e classificazione su righe separate, assenza di indicazioni terapeutiche per ogni organo), rendering del risultato non valutabile, conservazione di score null nello storico, cancellazione e catalogo senza rete. TypeScript, build Vite ed ESLint superati. Non eseguita una verifica interattiva completa in browser né validazione clinica: il progetto rimane un prototipo didattico.
 
 ## Limiti clinici
 

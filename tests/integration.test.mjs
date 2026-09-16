@@ -27,3 +27,26 @@ test('Catalogo disponibile senza rete e nessuna credenziale',async()=>{
 });
 // HTML snapshot for non-browser inspection; not a screenshot or end-to-end UI test.
 await writeFile('node_modules/.cache/her2-tests/result.html',renderToStaticMarkup(createElement(ResultCard,{result:computeScore(input),organName:'Mammella',sampleType:'resezione'})));
+
+test('Snapshot legacy: recupera organ_code senza ricalcolo o scrittura e conserva la conclusione',async()=>{
+ const {organ: _organ,...legacy}=computeScore({...input,organ:'vescica',controlsValid:true,intensity:'debole_moderata'});
+ const row={id:42,organ_code:'vescica',case_code:'LEGACY',algorithm_version:'0.2.0',result_snapshot:legacy};
+ const raw=JSON.stringify([row]);store.set('her2-evaluations-v2',raw);
+ try {
+  const [restored]=await api.fetchEvaluations();
+  assert.equal(restored.result_snapshot.organ,'vescica');
+  assert.deepEqual(restored.result_snapshot,{...legacy,organ:'vescica'});
+  assert.equal(store.get('her2-evaluations-v2'),raw);
+  const {buildReportText}=await import('../src/lib/report.ts');
+  assert.match(buildReportText(restored.result_snapshot,{organName:'Uroteliale',sampleTypeLabel:'Resezione'}),/Conclusione:/);
+ } finally {store.clear();}
+});
+test('Storico con organo mancante o discordante fallisce senza sovrascrivere',async()=>{
+ for(const snapshot of [{...computeScore(input),organ:undefined},computeScore(input)]) {
+  const raw=JSON.stringify([{id:43,organ_code:'sconosciuto',algorithm_version:'0.2.1',result_snapshot:snapshot}]);
+  store.set('her2-evaluations-v2',raw);
+  await assert.rejects(api.fetchEvaluations(),/Organo dello storico/);
+  assert.equal(store.get('her2-evaluations-v2'),raw);
+ }
+ store.clear();
+});
