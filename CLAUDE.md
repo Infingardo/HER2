@@ -9,3 +9,4 @@ Pathology decision-support tool, published on GitHub Pages. Vite/TypeScript app 
 - Keep logic separate from the UI where the code allows it. No fake precision: show uncertainty and equivocal results.
 - Secrets stay out of the repo: use `.env` (ignored) and keep `.env.example` current.
 - No patient data in code, tests, fixtures, docs or commit messages.
+- `AGENTS.md` is a copy of this file for Codex: keep the two aligned when you edit either.
